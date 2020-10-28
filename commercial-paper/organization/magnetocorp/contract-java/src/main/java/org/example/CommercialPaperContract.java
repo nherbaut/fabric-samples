@@ -25,7 +25,6 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
  *
  */
 @Contract(name = "org.papernet.commercialpaper", info = @Info(title = "MyAsset contract", description = "", version = "0.0.1", license = @License(name = "SPDX-License-Identifier: Apache-2.0", url = ""), contact = @Contact(email = "java-contract@example.com", name = "java-contract", url = "http://java-contract.me")))
-@Default
 public class CommercialPaperContract implements ContractInterface {
 
     // use the classname for the logger, this way you can refactor
@@ -71,6 +70,7 @@ public class CommercialPaperContract implements ContractInterface {
             String maturityDateTime, int faceValue) {
 
         System.out.println(ctx);
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
         // create an instance of the paper
         CommercialPaper paper = CommercialPaper.createInstance(issuer, paperNumber, issueDateTime, maturityDateTime,

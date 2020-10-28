@@ -34,3 +34,5 @@ cp ${DIR}/../test-network/organizations/peerOrganizations/org2.example.com/users
 
 echo Suggest that you monitor the docker containers by running
 echo "./organization/magnetocorp/configuration/cli/monitordocker.sh net_test"
+
+echo "-1" > version
