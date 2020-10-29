@@ -1,13 +1,23 @@
 package org.example.ledgerapi.impl;
 
+import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Logger;
 
+import org.example.Flow;
+import org.example.FlowList;
 import org.example.ledgerapi.State;
 import org.example.ledgerapi.StateDeserializer;
 import org.example.ledgerapi.StateList;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 import org.hyperledger.fabric.shim.ledger.CompositeKey;
+import org.hyperledger.fabric.shim.ledger.KeyValue;
+import org.hyperledger.fabric.shim.ledger.QueryResultsIterator;
+import org.hyperledger.fabric.shim.ledger.QueryResultsIteratorWithMetadata;
+import org.json.JSONObject;
 
 /*
 SPDX-License-Identifier: Apache-2.0
@@ -21,6 +31,7 @@ SPDX-License-Identifier: Apache-2.0
  */
 public class StateListImpl implements StateList {
 
+    private final static Logger LOG = Logger.getLogger(StateListImpl.class.getName());
     private Context ctx;
     private String name;
     private Object supportedClasses;
@@ -45,21 +56,20 @@ public class StateListImpl implements StateList {
      */
     @Override
     public StateList addState(State state) {
-        System.out.println("Adding state " + this.name);
+
+        LOG.severe("1.");
         ChaincodeStub stub = this.ctx.getStub();
-        System.out.println("Stub=" + stub);
+        LOG.severe("2.");
         String[] splitKey = state.getSplitKey();
-        System.out.println("Split key " + Arrays.asList(splitKey));
-
+        LOG.severe("3.");
         CompositeKey ledgerKey = stub.createCompositeKey(this.name, splitKey);
-        System.out.println("ledgerkey is ");
-        System.out.println(ledgerKey);
-
+        LOG.severe("4.");
         byte[] data = State.serialize(state);
-        System.out.println("ctx" + this.ctx);
-        System.out.println("stub" + this.ctx.getStub());
+        LOG.severe("5.");
         this.ctx.getStub().putState(ledgerKey.toString(), data);
-
+        LOG.severe("6.");
+        
+        
         return this;
     }
 
@@ -95,6 +105,23 @@ public class StateListImpl implements StateList {
         this.ctx.getStub().putState(ledgerKey.toString(), data);
 
         return this;
+    }
+
+    @Override
+    public String getAllStates() {
+        QueryResultsIterator<KeyValue> it = this.ctx.getStub().getStateByRange("", "");
+
+        List<Flow> queryResults = new ArrayList<>();
+
+        LOG.info("looping on keyvalue");
+        for (KeyValue result : it) {
+            LOG.info("here's one" + result.getStringValue());
+            Flow flow = Flow.deserialize(result.getStringValue().getBytes());
+            queryResults.add(flow);
+            LOG.info("here's one deserialized " + flow.toString());
+        }
+
+        return new JSONObject(queryResults).toString();
     }
 
 }

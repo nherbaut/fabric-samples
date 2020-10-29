@@ -1,5 +1,6 @@
 package org.example.ledgerapi;
 
+import org.example.Flow;
 import org.example.ledgerapi.impl.StateListImpl;
 import org.hyperledger.fabric.contract.Context;
 
@@ -44,5 +45,7 @@ public interface StateList {
      * separate becuase it is semantically distinct.
      */
     public StateList updateState(State state);
+
+    public String getAllStates();
 
 }

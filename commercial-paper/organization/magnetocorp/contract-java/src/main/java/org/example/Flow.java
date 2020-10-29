@@ -2,6 +2,9 @@ package org.example;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.example.ledgerapi.State;
 import org.hyperledger.fabric.contract.annotation.DataType;
 import org.hyperledger.fabric.contract.annotation.Property;
@@ -9,8 +12,10 @@ import org.json.JSONObject;
 
 @DataType()
 public class Flow extends State {
+
+    private final static Logger LOG = Logger.getLogger(Flow.class.getName());
     @Property
-    String event;
+    String event = "";
     @Property
     int table = -1;
     @Property
@@ -22,13 +27,13 @@ public class Flow extends State {
     @Property
     int in_port = -1;
     @Property
-    String dl_src;
+    String dl_src = "";
     @Property
-    String dl_dst;
+    String dl_dst = "";
     @Property
-    String arp_spa;
+    String arp_spa = "";
     @Property
-    String arp_tpa;
+    String arp_tpa = "";
     @Property
     int arp_op = -1;
     @Property
@@ -38,18 +43,23 @@ public class Flow extends State {
     @Property
     int icmp_code = -1;
     @Property
-    String actions;
+    String actions = "";
     @Property
-    String device;
+    String device = "";
     @Property
-    double timestamp;
+    double timestamp = -1.0;
 
     public Flow setKey() {
         this.key = State.makeKey(new String[] { this.getDevice(), "" + this.getTimestamp() });
         return this;
     }
 
+    public String getKey() {
+        return String.join(":", this.getSplitKey());
+    }
+
     public static Flow deserialize(byte[] data) {
+        LOG.log(Level.INFO, "@*@*@*@*@*" + new String(data, UTF_8));
         JSONObject json = new JSONObject(new String(data, UTF_8));
 
         String event = json.getString("event");
@@ -90,11 +100,9 @@ public class Flow extends State {
     }
 
     public static byte[] serialize(Flow flow) {
-        return State.serialize(flow);
-    }
+        byte[] data = State.serialize(flow);
 
-    public static Flow createInstance() {
-        return new Flow();
+        return data;
     }
 
     /**
@@ -103,10 +111,12 @@ public class Flow extends State {
     public static Flow createInstance(String deviceId, double timestamp, String event, int table, boolean icmp,
             String reason, boolean arp, int in_port, String dl_src, String dl_dst, String arp_spa, String arp_tpa,
             int arp_op, int nw_tos, int icmp_type, int icmp_code, String actions) {
-        return (Flow) new Flow().setEvent(event).setTable(table).setIcmp(icmp).setReason(reason).setArp(arp)
-                .setIn_port(in_port).setDl_src(dl_src).setDl_dst(dl_dst).setArp_spa(arp_spa).setArp_tpa(arp_tpa)
-                .setArp_op(arp_op).setNw_tos(nw_tos).setIcmp_type(icmp_type).setDevice(deviceId).setTimestamp(timestamp)
-                .setKey();
+        Flow res = (Flow) new Flow().setDevice(deviceId).setTimestamp(timestamp).setEvent(event).setTable(table)
+                .setIcmp(icmp).setReason(reason).setArp(arp).setIn_port(in_port).setDl_src(dl_src).setDl_dst(dl_dst)
+                .setArp_spa(arp_spa).setArp_tpa(arp_tpa).setArp_op(arp_op).setNw_tos(nw_tos).setIcmp_type(icmp_type)
+                .setIcmp_code(icmp_code).setActions(actions).setKey();
+
+        return res;
     }
 
     public String getEvent() {
@@ -260,5 +270,14 @@ public class Flow extends State {
     public Flow setTimestamp(double timestamp) {
         this.timestamp = timestamp;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "Flow [event=" + event + ", table=" + table + ", icmp=" + icmp + ", reason=" + reason + ", arp=" + arp
+                + ", in_port=" + in_port + ", dl_src=" + dl_src + ", dl_dst=" + dl_dst + ", arp_spa=" + arp_spa
+                + ", arp_tpa=" + arp_tpa + ", arp_op=" + arp_op + ", nw_tos=" + nw_tos + ", icmp_type=" + icmp_type
+                + ", icmp_code=" + icmp_code + ", actions=" + actions + ", device=" + device + ", timestamp="
+                + timestamp + "]";
     }
 }
